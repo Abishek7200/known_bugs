@@ -1,0 +1,348 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Known bugs</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+
+        h1 {
+            text-align: center;
+        }
+
+        button {
+            padding: 10px 20px;
+            background-color: #28a745;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-bottom: 20px;
+        }
+
+        button:hover {
+            background-color: #218838;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        table,
+        th,
+        td {
+            border: 1px solid #ccc;
+        }
+
+        th,
+        td {
+            padding: 10px;
+            text-align: left;
+        }
+
+        th {
+            background-color: #f2f2f2;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgba(0, 0, 0, 0.5);
+            padding-top: 60px;
+        }
+
+        .modal-content {
+            background-color: #fff;
+            margin: 5% auto;
+            padding: 20px;
+            border: 1px solid #888;
+            width: 80%;
+        }
+
+        .close {
+            color: #aaa;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+        }
+
+        .close:hover,
+        .close:focus {
+            color: black;
+            text-decoration: none;
+            cursor: pointer;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 5px;
+        }
+
+        input,
+        textarea {
+            width: 100%;
+            padding: 8px;
+            margin-bottom: 10px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+
+        .form-actions {
+            text-align: right;
+        }
+
+        .form-actions button {
+            margin-left: 10px;
+            background-color: #007bff;
+        }
+
+        .form-actions button.cancel {
+            background-color: #6c757d;
+        }
+
+        .form-actions button:hover {
+            background-color: #0056b3;
+        }
+
+        .form-actions button.cancel:hover {
+            background-color: #495057;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="modal" id="addBugModal">
+        <div class="modal-content">
+            <span class="close" onclick="closeModal('addBugModal')">&times;</span>
+            <h2>Add Bug</h2>
+            <form id="addBugForm">
+                <label for="failedTestCases">Failed Test Cases</label>
+                <input type="text" id="failedTestCases" name="failedTestCases" required>
+
+                <label for="bugId">Bug ID</label>
+                <input type="text" id="bugId" name="bugId" required>
+
+                <label for="title">Title</label>
+                <textarea id="title" name="title" rows="4" required></textarea>
+
+                <label for="bugTicketLink">Bug Ticket Link</label>
+                <input type="url" id="bugTicketLink" name="bugTicketLink" required>
+
+                <label for="status">Status</label>
+                <input type="text" id="status" name="status" required>
+
+                <label for="assignee">Assignee</label>
+                <input type="text" id="assignee" name="assignee" required>
+
+                <div class="form-actions">
+                    <button type="button" onclick="addBug()">Add Bug</button>
+                    <button type="button" class="cancel" onclick="closeModal('addBugModal')">Cancel</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div class="modal" id="editBugModal">
+        <div class="modal-content">
+            <span class="close" onclick="closeModal('editBugModal')">&times;</span>
+            <h2>Edit Bug</h2>
+            <form id="editBugForm">
+                <input type="hidden" id="editBugIndex" value="">
+                <label for="editFailedTestCases">Failed Test Cases</label>
+                <input type="text" id="editFailedTestCases" name="editFailedTestCases" required>
+
+                <label for="editBugId">Bug ID</label>
+                <input type="text" id="editBugId" name="editBugId" required>
+
+                <label for="editTitle">Title</label>
+                <input type="text" id="editTitle" name="editTitle" required>
+
+                <label for="editBugTicketLink">Bug Ticket Link</label>
+                <input type="url" id="editBugTicketLink" name="editBugTicketLink" required>
+
+                <label for="editStatus">Status</label>
+                <textarea id="editStatus" name="editStatus" rows="4" required></textarea>
+
+                <label for="editAssignee">Assignee</label>
+                <textarea id="editAssignee" name="editAssignee" rows="4" required></textarea>
+
+                <div class="form-actions">
+                    <button type="button" onclick="updateBug()">Update Bug</button>
+                    <button type="button" class="cancel" onclick="closeModal('editBugModal')">Cancel</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div class="modal" id="deleteBugModal">
+        <div class="modal-content">
+            <span class="close" onclick="closeModal('deleteBugModal')">&times;</span>
+            <h2>Delete Bug</h2>
+            <p>Are you sure you want to delete this bug?</p>
+            <div class="form-actions">
+                <input type="hidden" id="deleteBugIndex">
+                <button type="button" onclick="confirmDelete()">Yes</button>
+                <button type="button" class="cancel" onclick="closeModal('deleteBugModal')">No</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="container">
+        <h2 style="text-align: center;">Known bugs</h2>
+
+        <button onclick="openModal('addBugModal')">Add Bug</button>
+
+        <table>
+            <thead>
+                <tr>
+                    <th>Failed Test Cases</th>
+                    <th>Bug ID</th>
+                    <th>Title</th>
+                    <th>Bug Ticket Link</th>
+                    <th>Status</th>
+                    <th>Assignee</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody id="bugList">
+                <!-- Bug entries will be added here -->
+            </tbody>
+        </table>
+    </div>
+
+    <script>
+        let bugs = [];
+
+        // Function to open a modal by its ID
+        function openModal(modalId) {
+            const modal = document.getElementById(modalId);
+            modal.style.display = 'block';
+        }
+
+        // Function to close a modal by its ID
+        function closeModal(modalId) {
+            const modal = document.getElementById(modalId);
+            modal.style.display = 'none';
+        }
+
+        // Function to open the Edit Bug modal and prefill with bug data
+        function openEditModal(index) {
+            const bug = bugs[index];
+            if (bug) {
+                document.getElementById('editBugIndex').value = index;
+                document.getElementById('editFailedTestCases').value = bug.failedTestCases;
+                document.getElementById('editBugId').value = bug.bugId;
+                document.getElementById('editTitle').value = bug.title;
+                document.getElementById('editBugTicketLink').value = bug.bugTicketLink;
+                document.getElementById('editStatus').value = bug.status;
+                document.getElementById('editAssignee').value = bug.assignee;
+                openModal('editBugModal');
+            } else {
+                console.error(`Bug at index ${index} not found.`);
+            }
+        }
+
+        // Function to ask for confirmation before deleting a bug
+        function askDelete(index) {
+            const deleteBugIndex = document.getElementById('deleteBugIndex');
+            if (deleteBugIndex) {
+                deleteBugIndex.value = index;
+                openModal('deleteBugModal');
+            } else {
+                console.error('Delete bug index element not found.');
+            }
+        }
+
+        // Function to confirm deletion of a bug
+        function confirmDelete() {
+            const index = document.getElementById('deleteBugIndex').value;
+            bugs.splice(index, 1); // Remove bug from bugs array
+            saveToLocalStorage(); // Save updated bugs array to localStorage
+            loadBugs(); // Reload bugs list in UI
+            closeModal('deleteBugModal'); // Close delete confirmation modal
+        }
+
+        // Function to add a new bug
+        function addBug() {
+            const addBugForm = document.getElementById('addBugForm');
+            const newBug = {
+                failedTestCases: addBugForm.failedTestCases.value,
+                bugId: addBugForm.bugId.value,
+                title: addBugForm.title.value,
+                bugTicketLink: addBugForm.bugTicketLink.value,
+                status: addBugForm.status.value,
+                assignee: addBugForm.assignee.value
+            };
+            bugs.push(newBug);
+            saveToLocalStorage();
+            loadBugs();
+            closeModal('addBugModal');
+            addBugForm.reset();
+        }
+
+        // Function to update an existing bug
+        function updateBug() {
+            const editBugForm = document.getElementById('editBugForm');
+            const index = document.getElementById('editBugIndex').value;
+            bugs[index] = {
+                failedTestCases: editBugForm.editFailedTestCases.value,
+                bugId: editBugForm.editBugId.value,
+                title: editBugForm.editTitle.value,
+                bugTicketLink: editBugForm.editBugTicketLink.value,
+                status: editBugForm.editStatus.value,
+                assignee: editBugForm.editAssignee.value
+            };
+            saveToLocalStorage();
+            loadBugs();
+            closeModal('editBugModal');
+        }
+
+        // Function to save bugs array to localStorage
+        function saveToLocalStorage() {
+            localStorage.setItem('bugs', JSON.stringify(bugs));
+        }
+
+        // Function to load bugs from localStorage or initialize if empty
+        function loadBugs() {
+            const bugList = document.getElementById('bugList');
+            bugs = JSON.parse(localStorage.getItem('bugs')) || [];
+            bugList.innerHTML = '';
+            bugs.forEach((bug, index) => {
+                const newRow = document.createElement('tr');
+                newRow.innerHTML = `
+                    <td>${bug.failedTestCases}</td>
+                    <td>${bug.bugId}</td>
+                    <td>${bug.title}</td>
+                    <td><a href="${bug.bugTicketLink}" target="_blank">${bug.bugTicketLink}</a></td>
+                    <td>${bug.status}</td>
+                    <td>${bug.assignee}</td>
+                    <td>
+                        <button onclick="openEditModal(${index})">Edit</button>
+                        <button onclick="askDelete(${index})">Delete</button>
+                    </td>
+                `;
+                bugList.appendChild(newRow);
+            });
+        }
+
+        // Initial load of bugs
+        loadBugs();
+    </script>
+
+</body>
+
+
+</html>
